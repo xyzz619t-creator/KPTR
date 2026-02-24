@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Price Tag Request Form</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --forest:    #f22f9c;
+      --sage:      #74463a;
+      --cream:     #faf8f3;
+      --parchment: #f2ece0;
+      --gold:      #c8954a;
+      --gold-lt:   #f0e6c8;
+      --ink:       #1c1c1c;
+      --muted:     #7a7570;
+      --border:    #ddd6c8;
+      --error:     #b84040;
+      --radius:    10px;
+    }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--cream);
+      color: var(--ink);
+      min-height: 100vh;
+      background-image:
+        radial-gradient(ellipse at 5% 10%, rgba(26,42,31,0.05) 0%, transparent 55%),
+        radial-gradient(ellipse at 95% 90%, rgba(200,149,74,0.07) 0%, transparent 55%);
+    }
+
+    /* ── Banner ── */
+    .banner {
+      width: 100%;
+      height: 130px;
+      background: linear-gradient(135deg, var(--forest) 0%, #f22f9c 60%, #fd66bb 100%);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .banner-pattern {
+      position: absolute; inset: 0; opacity: 0.06;
+      background-image: repeating-linear-gradient(45deg, transparent, transparent 20px,
+        rgba(255,255,255,0.8) 20px, rgba(255,255,255,0.8) 21px);
+    }
+
+    .banner-content {
+      position: relative;
+      text-align: center;
+    }
+
+    .banner-label {
+      font-size: 10px; font-weight: 600; letter-spacing: 3px;
+      text-transform: uppercase; color: rgba(240,230,200,0.65);
+      margin-bottom: 6px;
+    }
+
+    .banner-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 30px; font-weight: 700; color: #fff;
+    }
+
+    .banner-title span { color: var(--gold-lt); }
+
+    /* ── Page ── */
+    .page {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 0 20px 80px;
+    }
+
+    /* ── Notice ── */
+    .notice {
+      background: #fff8ec;
+      border: 1.5px solid #f0d080;
+      border-radius: var(--radius);
+      padding: 13px 16px;
+      margin: 24px 0 20px;
+      font-size: 13px; color: #6b4f00; line-height: 1.6;
+    }
+
+    .notice strong {
+      display: block; margin-bottom: 2px;
+      font-size: 10px; letter-spacing: 1px;
+      text-transform: uppercase; color: #8a6500;
+    }
+
+    /* ── Cards ── */
+    .card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 32px 32px 28px;
+      box-shadow: 0 4px 28px rgba(26,42,31,0.07), 0 1px 4px rgba(0,0,0,0.04);
+      margin-bottom: 16px;
+      animation: fadeUp 0.45s ease both;
+    }
+
+    .card:nth-child(2) { animation-delay: 0.05s; }
+    .card:nth-child(3) { animation-delay: 0.1s; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Form layout ── */
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .form-group { margin-bottom: 20px; }
+    .form-group:last-child { margin-bottom: 0; }
+
+    label {
+      display: block;
+      font-size: 10.5px; font-weight: 600;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      color: var(--sage); margin-bottom: 7px;
+    }
+
+    label .req { color: var(--gold); margin-left: 2px; }
+
+    input[type="email"],
+    input[type="date"],
+    select,
+    textarea {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 14px;
+      color: var(--ink);
+      background: var(--cream);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+      -webkit-appearance: none; appearance: none;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--forest);
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(26,42,31,0.08);
+    }
+
+    .select-wrap { position: relative; }
+    .select-wrap::after {
+      content: '';
+      position: absolute; right: 13px; top: 50%;
+      transform: translateY(-50%);
+      width: 0; height: 0;
+      border-left: 5px solid transparent;
+      border-right: 5px solid transparent;
+      border-top: 6px solid var(--muted);
+      pointer-events: none;
+    }
+
+    select { cursor: pointer; padding-right: 34px; }
+
+    textarea {
+      resize: vertical; min-height: 76px;
+      line-height: 1.6; font-size: 13.5px;
+    }
+
+    /* ── Section header inside card ── */
+    .card-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 20px; font-weight: 600;
+      color: var(--forest); margin-bottom: 4px;
+    }
+
+    .card-subtitle {
+      font-size: 12px; color: var(--muted);
+      margin-bottom: 20px;
+    }
+
+    /* ── Search bar for products ── */
+    .product-search-wrap {
+      position: relative; margin-bottom: 18px;
+    }
+
+    .product-search-wrap svg {
+      position: absolute; left: 11px; top: 50%;
+      transform: translateY(-50%); color: var(--muted);
+      pointer-events: none;
+    }
+
+    .product-search {
+      width: 100%;
+      padding: 10px 14px 10px 34px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 13px; color: var(--ink);
+      background: var(--cream); outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .product-search:focus {
+      border-color: var(--forest);
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(26,42,31,0.08);
+    }
+
+    .product-search::placeholder { color: var(--muted); }
+
+    /* ── Selected count badge ── */
+    .selected-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--forest);
+      color: #fff;
+      font-size: 11px; font-weight: 600;
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 16px;
+      transition: opacity 0.2s;
+    }
+
+    .selected-badge.zero { background: var(--border); color: var(--muted); }
+
+    /* ── Category group ── */
+    .category-group { margin-bottom: 20px; }
+
+    .category-group:last-child { margin-bottom: 0; }
+
+    .cat-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .cat-label {
+      font-size: 10px; font-weight: 700;
+      letter-spacing: 2px; text-transform: uppercase;
+      color: var(--sage);
+    }
+
+    .cat-line {
+      flex: 1; height: 1px;
+      background: var(--border);
+    }
+
+    .cat-count {
+      font-size: 10px; color: var(--muted);
+      background: var(--parchment);
+      padding: 1px 8px; border-radius: 10px;
+      border: 1px solid var(--border);
+    }
+
+    .cat-toggle {
+      font-size: 11px; color: var(--muted);
+      transition: transform 0.2s;
+    }
+
+    .cat-toggle.collapsed { transform: rotate(-90deg); }
+
+    .cat-items {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 6px;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+
+    .cat-items.collapsed { max-height: 0 !important; }
+
+    /* ── Checkbox item ── */
+    .check-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+      background: var(--cream);
+    }
+
+    .check-item:hover { border-color: var(--sage); background: #fff; }
+
+    .check-item.checked {
+      border-color: var(--forest);
+      background: rgba(26,42,31,0.05);
+    }
+
+    /* Custom checkbox */
+    .check-box {
+      width: 18px; height: 18px;
+      border: 2px solid var(--border);
+      border-radius: 4px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: border-color 0.15s, background 0.15s;
+      background: #fff;
+    }
+
+    .check-item.checked .check-box {
+      background: var(--forest);
+      border-color: var(--forest);
+    }
+
+    .check-box svg { display: none; }
+    .check-item.checked .check-box svg { display: block; }
+
+    .check-name {
+      font-size: 13px; font-weight: 500;
+      color: var(--ink); line-height: 1.3;
+    }
+
+    .check-item.hidden { display: none; }
+
+    /* ── No results ── */
+    .no-results {
+      text-align: center;
+      padding: 28px;
+      color: var(--muted);
+      font-size: 13px;
+      display: none;
+    }
+
+    /* ── Select/deselect all per category ── */
+    .cat-actions {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .cat-action-btn {
+      font-size: 11px; color: var(--sage);
+      background: none; border: none;
+      cursor: pointer; padding: 0;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+      font-family: 'Outfit', sans-serif;
+    }
+
+    .cat-action-btn:hover { color: var(--forest); }
+
+    /* ── Alerts ── */
+    .alert {
+      border-radius: 8px; padding: 12px 15px;
+      font-size: 13px; margin-bottom: 18px; display: none;
+    }
+
+    .alert-error {
+      background: #fdf0f0;
+      border: 1.5px solid #f0b8b8;
+      color: var(--error);
+    }
+
+    /* ── Submit ── */
+    .btn-submit {
+      width: 100%; padding: 14px;
+      background: var(--forest); color: #fff;
+      border: none; border-radius: 8px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 14px; font-weight: 600;
+      letter-spacing: 1px; text-transform: uppercase;
+      cursor: pointer; margin-top: 10px;
+      transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+    }
+
+    .btn-submit:hover:not(:disabled) {
+      background: #d7008e;
+      box-shadow: 0 4px 18px rgba(26,42,31,0.22);
+      transform: translateY(-1px);
+    }
+
+    .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    .spinner {
+      display: inline-block; width: 14px; height: 14px;
+      border: 2px solid rgba(255,255,255,0.35);
+      border-top-color: #fff; border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      vertical-align: middle; margin-right: 8px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .required-note { font-size: 11px; color: var(--muted); margin-bottom: 20px; }
+    .required-note span { color: var(--gold); }
+
+    .section-div { border: none; border-top: 1px dashed var(--border); margin: 22px 0; }
+
+    /* ── Success screen ── */
+    .success-screen {
+      display: none; text-align: center;
+      padding: 52px 20px;
+      animation: fadeUp 0.4s ease;
+    }
+
+    .success-icon { font-size: 52px; margin-bottom: 16px; }
+
+    .success-screen h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 26px; color: var(--forest); margin-bottom: 10px;
+    }
+
+    .success-screen p {
+      color: var(--muted); font-size: 14px;
+      line-height: 1.6; margin-bottom: 20px;
+    }
+
+    .status-pill {
+      display: inline-block;
+      background: #fff3cd; color: #856404;
+      border: 1px solid #f0d080;
+      padding: 5px 18px; border-radius: 20px;
+      font-size: 12px; font-weight: 700;
+      letter-spacing: 1.5px; text-transform: uppercase;
+    }
+
+    .btn-new {
+      display: inline-block; margin-top: 20px;
+      padding: 11px 28px;
+      background: var(--forest); color: #fff;
+      border: none; border-radius: 8px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 13px; font-weight: 500;
+      cursor: pointer; transition: background 0.2s;
+    }
+
+    .btn-new:hover { background: #0f1a12; }
+
+    /* ── Loading skeleton ── */
+    .skeleton-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 6px;
+    }
+
+    .skeleton-item {
+      height: 40px; border-radius: 8px;
+      background: linear-gradient(90deg, var(--parchment) 25%, #e8e0d0 50%, var(--parchment) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.2s infinite;
+    }
+
+    @keyframes shimmer {
+      from { background-position: 200% 0; }
+      to   { background-position: -200% 0; }
+    }
+
+    @media (max-width: 520px) {
+      .card { padding: 22px 16px; }
+      .form-row { grid-template-columns: 1fr; }
+      .cat-items { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Banner -->
+  <div class="banner">
+    <div class="banner-pattern"></div>
+    <div class="banner-content">
+      <div class="banner-label">Katrina  Operations</div>
+      <div class="banner-title">Price Tag <span>Request Form</span></div>
+    </div>
+  </div>
+
+  <div class="page">
+
+    <div class="notice">
+      <strong>⚠ Please Read Before Submitting</strong>
+      Kindly ensure that all missing price tags are properly checked and consolidated before submitting a request. This will enable us to process and dispatch them in one complete batch, rather than receiving repeated requests on a daily or alternate-day basis.
+    </div>
+
+    <!-- ── FORM ── -->
+    <div id="formWrap">
+
+      <!-- Card 1: Details -->
+      <div class="card">
+        <div class="required-note"><span>*</span> Indicates required field</div>
+        <div class="alert alert-error" id="errorAlert"></div>
+
+        <div class="form-group">
+          <label for="emailField">Email <span class="req">*</span></label>
+          <input type="email" id="emailField" placeholder="your@flexway.com">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="dateField">Date Requested <span class="req">*</span></label>
+            <input type="date" id="dateField">
+          </div>
+          <div class="form-group">
+            <label for="branchField">Branch <span class="req">*</span></label>
+            <div class="select-wrap">
+              <select id="branchField">
+                <option value="">— Choose branch —</option>
+                <option>UPTOWN MIRDIF</option>
+                <option>AL BARSHA</option>
+                <option>BIN SOUGAT</option>
+                <option>SUSTAINABLE CITY</option>
+                <option>DIFC</option>
+                <option>MEGA MALL</option>
+                <option>ZAWAYA</option>
+                <option>VILLANOVA</option>
+                <option>DUBAI HILLS</option>
+                <option>JVC/KCC</option>
+                <option>MAMSHA</option>
+                <option>DISCOVERY GARDEN</option>
+                <option>MOTOR CITY</option>
+                <option>DHCC</option>
+                <option>SUNSET MALL</option>
+                <option>ENOC 1025</option>
+                <option>NASHMA</option>
+                <option>MARKET MALL</option>
+                <option>LOGGIA PLAZA</option>
+                <option>ARJAN KCC</option>
+                <option>NOOR 3</option>
+                <option>ENOC 1005</option>
+                <option>AL GHURAIR</option>
+                <option>MIRDIF</option>
+                <option>MUWAELIH</option>
+                <option>MEDIA CITY</option>
+                <option>AL GARHOUD S7</option>
+                <option>ELEGANZA</option>
+                <option>MAMZAR</option>
+                <option>J ONE</option>
+                <option>NBQ</option>
+                <option>AL NAHDA</option>
+                <option>SATWA</option>
+                <option>AL FURJAN</option>
+                <option>TULIP MAJAN</option>
+                <option>YAS MALL</option>
+                <option>KHALIDIYAH</option>
+                <option>BAWABAT</option>
+                <option>ABU DHABI MALL</option>
+                <option>ARJAN -S7</option>
+                <option>JVC- S7</option>
+                <option>FESTIVAL CITY</option>
+                <option>AVENUE - S7</option>
+                <option>RAMANIA</option>
+                <option>EMERALD JADDAF</option>
+                <option>KCC LULU</option>
+                <option>KCC SPORTS SOCIETY</option>
+                <option>KARAMA - S7</option>
+                <option>RIMAL - S7</option>
+                <option>KCC INTERNATIONAL CITY</option>
+                <option>ARENCO</option>
+                <option>AJMAN</option>
+                <option>AL QASBA</option>
+                <option>SHAMS BOUTIK</option>
+                <option>RIGGAT AL BUTEEN</option>
+                <option>JAFZA</option>
+                <option>UM AL QUAIN</option>
+                <option>MANAR MALL</option>
+                <option>SAHARA MALL</option>
+                <option>RAK MALL</option>
+                <option>JLT</option>
+                <option>BURJUMAN</option>
+                <option>BUSINESS VILLAGE</option>
+                <option>ENOC 1096</option>
+                <option>KCC DAMAC HILLS 2</option>
+                <option>KCC UNA APARTMENT</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <hr class="section-div">
+
+        <div class="form-group" style="margin-bottom:0;">
+          <label for="notesField">Notes / Special Instructions</label>
+          <textarea id="notesField" placeholder="Any urgency, special context, or additional instructions…"></textarea>
+        </div>
+      </div>
+
+      <!-- Card 2: Product checkboxes -->
+      <div class="card">
+        <div class="card-title">Select Price Tags</div>
+        <div class="card-subtitle">Tick all items you need price tags for. Items are grouped by category.</div>
+
+        <!-- Search -->
+        <div class="product-search-wrap">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+          </svg>
+          <input class="product-search" id="productSearch" type="text" placeholder="Search products…">
+        </div>
+
+        <!-- Selected count -->
+        <div class="selected-badge zero" id="selectedBadge">0 items selected</div>
+
+        <!-- Loading state -->
+        <div id="loadingState">
+          <div class="skeleton-list">
+            <div class="skeleton-item"></div><div class="skeleton-item"></div>
+            <div class="skeleton-item"></div><div class="skeleton-item"></div>
+            <div class="skeleton-item"></div><div class="skeleton-item"></div>
+            <div class="skeleton-item"></div><div class="skeleton-item"></div>
+          </div>
+        </div>
+
+        <!-- Product groups (populated by JS) -->
+        <div id="productGroups" style="display:none;"></div>
+        <div class="no-results" id="noResults">No products match your search.</div>
+      </div>
+
+      <!-- Card 3: Submit -->
+      <div class="card" style="padding:24px 32px;">
+        <button class="btn-submit" id="submitBtn" onclick="handleSubmit()">
+          Submit Request
+        </button>
+      </div>
+
+    </div><!-- /#formWrap -->
+
+    <!-- Success screen -->
+    <div class="card success-screen" id="successScreen">
+      <div class="success-icon">✅</div>
+      <h2>Request Submitted!</h2>
+      <p>Your price tag request has been received and is now queued for processing.<br>A confirmation has been sent to your email.</p>
+      <div class="status-pill">● Pending</div>
+      <br>
+      <button class="btn-new" onclick="resetForm()">Submit Another Request</button>
+    </div>
+
+  </div><!-- /.page -->
+
+  <script>
+    const CATEGORIES = ['CAKES', 'BAKERY', 'PASTRIES', 'SSMM'];
+    let allProducts  = [];
+    let checked      = new Set();
+
+    // ── Boot ─────────────────────────────────────────────
+    document.getElementById('dateField').valueAsDate = new Date();
+
+    window.addEventListener('DOMContentLoaded', () => {
+      google.script.run
+        .withSuccessHandler(onProductsLoaded)
+        .withFailureHandler(err => {
+          document.getElementById('loadingState').innerHTML =
+            `<p style="color:#b84040;font-size:13px;">⚠ Failed to load products: ${err.message}</p>`;
+        })
+        .getProducts();
+
+      document.getElementById('productSearch').addEventListener('input', filterProducts);
+    });
+
+    function onProductsLoaded(products) {
+      allProducts = products;
+      document.getElementById('loadingState').style.display = 'none';
+      renderGroups(products);
+      document.getElementById('productGroups').style.display = 'block';
+    }
+
+    // ── Render grouped checkboxes ─────────────────────────
+    function renderGroups(products) {
+      const container = document.getElementById('productGroups');
+
+      // Group products by category; put uncategorised under "OTHER"
+      const groups = {};
+      CATEGORIES.forEach(c => groups[c] = []);
+      groups['OTHER'] = [];
+
+      products.forEach(p => {
+        const cat = p.category && CATEGORIES.includes(p.category) ? p.category : 'OTHER';
+        groups[cat].push(p);
+      });
+
+      container.innerHTML = CATEGORIES
+        .filter(cat => groups[cat].length > 0)
+        .concat(groups['OTHER'].length > 0 ? ['OTHER'] : [])
+        .map(cat => buildCategoryHTML(cat, groups[cat]))
+        .join('');
+
+      // Set dynamic max-height for collapse animation
+      container.querySelectorAll('.cat-items').forEach(el => {
+        el.style.maxHeight = el.scrollHeight + 'px';
+      });
+    }
+
+    function buildCategoryHTML(cat, items) {
+      const itemsHTML = items.map(p => `
+        <div class="check-item" id="ci-${slugify(p.name)}" onclick="toggleItem(this, '${esc(p.name)}')">
+          <span class="check-box">
+            <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
+              <path d="M2 6l3 3 5-5" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+          <span class="check-name">${p.name}</span>
+        </div>`).join('');
+
+      return `
+        <div class="category-group" data-cat="${cat}">
+          <div class="cat-header" onclick="toggleCategory('${cat}')">
+            <span class="cat-label">${cat}</span>
+            <span class="cat-line"></span>
+            <span class="cat-count" id="cnt-${cat}">${items.length}</span>
+            <span class="cat-toggle" id="tog-${cat}">▾</span>
+          </div>
+          <div class="cat-actions">
+            <button class="cat-action-btn" onclick="selectAllCat(event,'${cat}')">Select all</button>
+            <span style="color:var(--border);">·</span>
+            <button class="cat-action-btn" onclick="deselectAllCat(event,'${cat}')">Deselect all</button>
+          </div>
+          <div class="cat-items" id="catItems-${cat}">
+            ${itemsHTML}
+          </div>
+        </div>`;
+    }
+
+    // ── Toggle single item ────────────────────────────────
+    function toggleItem(el, name) {
+      if (checked.has(name)) {
+        checked.delete(name);
+        el.classList.remove('checked');
+      } else {
+        checked.add(name);
+        el.classList.add('checked');
+      }
+      updateBadge();
+    }
+
+    // ── Select / deselect all in category ────────────────
+    function selectAllCat(e, cat) {
+      e.stopPropagation();
+      const group = document.querySelector(`.category-group[data-cat="${cat}"]`);
+      group.querySelectorAll('.check-item:not(.hidden)').forEach(el => {
+        const name = el.querySelector('.check-name').textContent;
+        checked.add(name);
+        el.classList.add('checked');
+      });
+      updateBadge();
+    }
+
+    function deselectAllCat(e, cat) {
+      e.stopPropagation();
+      const group = document.querySelector(`.category-group[data-cat="${cat}"]`);
+      group.querySelectorAll('.check-item').forEach(el => {
+        const name = el.querySelector('.check-name').textContent;
+        checked.delete(name);
+        el.classList.remove('checked');
+      });
+      updateBadge();
+    }
+
+    // ── Collapse / expand category ────────────────────────
+    function toggleCategory(cat) {
+      const items = document.getElementById('catItems-' + cat);
+      const tog   = document.getElementById('tog-' + cat);
+      const isCollapsed = items.classList.contains('collapsed');
+      if (isCollapsed) {
+        items.style.maxHeight = items.scrollHeight + 'px';
+        items.classList.remove('collapsed');
+        tog.classList.remove('collapsed');
+      } else {
+        items.style.maxHeight = items.scrollHeight + 'px';
+        requestAnimationFrame(() => {
+          items.style.maxHeight = '0px';
+          items.classList.add('collapsed');
+          tog.classList.add('collapsed');
+        });
+      }
+    }
+
+    // ── Search / filter ───────────────────────────────────
+    function filterProducts() {
+      const q = document.getElementById('productSearch').value.trim().toLowerCase();
+      let anyVisible = false;
+
+      document.querySelectorAll('.category-group').forEach(group => {
+        let groupVisible = false;
+        group.querySelectorAll('.check-item').forEach(label => {
+          const name = label.querySelector('.check-name').textContent.toLowerCase();
+          const show = !q || name.includes(q);
+          label.classList.toggle('hidden', !show);
+          if (show) { groupVisible = true; anyVisible = true; }
+        });
+        group.style.display = groupVisible ? '' : 'none';
+
+        // Re-expand on search
+        if (q && groupVisible) {
+          const items = group.querySelector('.cat-items');
+          const tog   = group.querySelector('.cat-toggle');
+          items.classList.remove('collapsed');
+          tog.classList.remove('collapsed');
+          items.style.maxHeight = '9999px';
+        }
+      });
+
+      document.getElementById('noResults').style.display = anyVisible ? 'none' : 'block';
+    }
+
+    // ── Badge ─────────────────────────────────────────────
+    function updateBadge() {
+      const badge = document.getElementById('selectedBadge');
+      const n = checked.size;
+      badge.textContent = n === 0
+        ? '0 items selected'
+        : `${n} item${n !== 1 ? 's' : ''} selected`;
+      badge.classList.toggle('zero', n === 0);
+    }
+
+    // ── Submit ────────────────────────────────────────────
+    function handleSubmit() {
+      const email  = document.getElementById('emailField').value.trim();
+      const date   = document.getElementById('dateField').value;
+      const branch = document.getElementById('branchField').value;
+      const notes  = document.getElementById('notesField').value.trim();
+      const errorEl = document.getElementById('errorAlert');
+
+      errorEl.style.display = 'none';
+
+      if (!email || !email.includes('@')) return showError('Please enter a valid email address.');
+      if (!date)   return showError('Please select a date.');
+      if (!branch) return showError('Please select your branch.');
+      if (checked.size === 0) return showError('Please select at least one product.');
+
+      // Build the list string
+      const selectedNames = [...checked];
+      const priceTagList  = selectedNames.map((n, i) => `${i + 1}. ${n}`).join('\n');
+
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span>Submitting…';
+
+      google.script.run
+        .withSuccessHandler(res => {
+          btn.disabled = false;
+          btn.innerHTML = 'Submit Request';
+          if (res.success) {
+            document.getElementById('formWrap').style.display = 'none';
+            document.getElementById('successScreen').style.display = 'block';
+          } else {
+            showError('Submission failed: ' + (res.error || 'Unknown error.'));
+          }
+        })
+        .withFailureHandler(err => {
+          btn.disabled = false;
+          btn.innerHTML = 'Submit Request';
+          showError('An error occurred: ' + err.message);
+        })
+        .submitRequest({ email, dateRequested: date, branch, priceTagList, notes });
+    }
+
+    function showError(msg) {
+      const el = document.getElementById('errorAlert');
+      el.textContent = '⚠ ' + msg;
+      el.style.display = 'block';
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    // ── Reset ─────────────────────────────────────────────
+    function resetForm() {
+      document.getElementById('emailField').value = '';
+      document.getElementById('dateField').valueAsDate = new Date();
+      document.getElementById('branchField').value = '';
+      document.getElementById('notesField').value  = '';
+      document.getElementById('productSearch').value = '';
+      checked.clear();
+      document.querySelectorAll('.check-item').forEach(l => {
+        l.classList.remove('checked', 'hidden');
+      });
+      document.querySelectorAll('.category-group').forEach(g => g.style.display = '');
+      document.getElementById('noResults').style.display = 'none';
+      updateBadge();
+      document.getElementById('formWrap').style.display      = 'block';
+      document.getElementById('successScreen').style.display = 'none';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // ── Helpers ───────────────────────────────────────────
+    function slugify(s) { return s.replace(/[^a-z0-9]/gi, '-').toLowerCase(); }
+    function esc(s)     { return s.replace(/'/g, "\\'").replace(/"/g, '&quot;'); }
+  </script>
+</body>
+</html>
