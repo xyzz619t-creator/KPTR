@@ -10,8 +10,8 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --forest:    #f22f9c;
-      --sage:      #74463a;
+      --forest:    #1a2a1f;
+      --sage:      #4a7a5e;
       --cream:     #faf8f3;
       --parchment: #f2ece0;
       --gold:      #c8954a;
@@ -37,7 +37,7 @@
     .banner {
       width: 100%;
       height: 130px;
-      background: linear-gradient(135deg, var(--forest) 0%, #f22f9c 60%, #fd66bb 100%);
+      background: linear-gradient(135deg, var(--forest) 0%, #2d5a3d 60%, #4a7a5e 100%);
       position: relative;
       overflow: hidden;
       display: flex;
@@ -230,10 +230,75 @@
 
     .selected-badge.zero { background: var(--border); color: var(--muted); }
 
-    /* ── Category group ── */
-    .category-group { margin-bottom: 20px; }
+    /* ── Category tabs ── */
+    .category-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 2px solid var(--border);
+    }
 
-    .category-group:last-child { margin-bottom: 0; }
+    .cat-tab {
+      padding: 8px 16px;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--charcoal);
+      cursor: pointer;
+      transition: all 0.2s;
+      text-transform: capitalize;
+    }
+
+    .cat-tab:hover {
+      background: var(--cream);
+      border-color: var(--sage);
+    }
+
+    .cat-tab.active {
+      background: var(--forest);
+      border-color: var(--forest);
+      color: #fff;
+      text-decoration: underline;
+    }
+
+    .cat-tab-actions {
+      margin-left: auto;
+      display: flex;
+      gap: 8px;
+    }
+
+    .cat-tab.action {
+      background: none;
+      border: none;
+      text-decoration: underline;
+      color: var(--sage);
+      padding: 10px 12px;
+    }
+
+    .cat-tab.action:hover {
+      color: var(--forest);
+      background: none;
+    }
+
+    /* ── Product grid ── */
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    @media (max-width: 900px) {
+      .product-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 600px) {
+      .product-grid { grid-template-columns: 1fr; }
+    }
 
     .cat-header {
       display: flex;
@@ -377,7 +442,7 @@
     }
 
     .btn-submit:hover:not(:disabled) {
-      background: #d7008e;
+      background: #0f1a12;
       box-shadow: 0 4px 18px rgba(26,42,31,0.22);
       transform: translateY(-1px);
     }
@@ -471,7 +536,7 @@
   <div class="banner">
     <div class="banner-pattern"></div>
     <div class="banner-content">
-      <div class="banner-label">Katrina  Operations</div>
+      <div class="banner-label">Internal Operations</div>
       <div class="banner-title">Price Tag <span>Request Form</span></div>
     </div>
   </div>
@@ -493,7 +558,7 @@
 
         <div class="form-group">
           <label for="emailField">Email <span class="req">*</span></label>
-          <input type="email" id="emailField" placeholder="your@flexway.com">
+          <input type="email" id="emailField" placeholder="your@email.com">
         </div>
 
         <div class="form-row">
@@ -514,8 +579,10 @@
                 <option>MEGA MALL</option>
                 <option>ZAWAYA</option>
                 <option>VILLANOVA</option>
+                <option>LAMCY</option>
                 <option>DUBAI HILLS</option>
                 <option>JVC/KCC</option>
+                <option>BUSINESS BAY</option>
                 <option>MAMSHA</option>
                 <option>DISCOVERY GARDEN</option>
                 <option>MOTOR CITY</option>
@@ -536,8 +603,10 @@
                 <option>ELEGANZA</option>
                 <option>MAMZAR</option>
                 <option>J ONE</option>
+                <option>AL MUTTENA</option>
                 <option>NBQ</option>
                 <option>AL NAHDA</option>
+                <option>ANDALUSIA</option>
                 <option>SATWA</option>
                 <option>AL FURJAN</option>
                 <option>TULIP MAJAN</option>
@@ -562,6 +631,7 @@
                 <option>SHAMS BOUTIK</option>
                 <option>RIGGAT AL BUTEEN</option>
                 <option>JAFZA</option>
+                <option>MANKHOOL</option>
                 <option>UM AL QUAIN</option>
                 <option>MANAR MALL</option>
                 <option>SAHARA MALL</option>
@@ -638,8 +708,7 @@
   </div><!-- /.page -->
 
   <script>
-    const CATEGORIES = ['CAKES', 'BAKERY', 'PASTRIES', 'SSMM'];
-    let allProducts  = [];
+    const CATEGORIES = ['CAKE', 'PASTRY', 'BAKERY', 'SSMM', 'DRINKS', 'SANDWICH'];
     let checked      = new Set();
 
     // ── Boot ─────────────────────────────────────────────
@@ -665,33 +734,84 @@
     }
 
     // ── Render grouped checkboxes ─────────────────────────
+    // Store products and groups globally for filtering
+    let allProducts = [];
+    let productGroups = {};
+    let activeCategory = 'ALL';
+
     function renderGroups(products) {
+      allProducts = products;
       const container = document.getElementById('productGroups');
 
-      // Group products by category; put uncategorised under "OTHER"
-      const groups = {};
-      CATEGORIES.forEach(c => groups[c] = []);
-      groups['OTHER'] = [];
+      // Group products by category
+      productGroups = {};
+      CATEGORIES.forEach(c => productGroups[c] = []);
+      productGroups['OTHER'] = [];
 
       products.forEach(p => {
         const cat = p.category && CATEGORIES.includes(p.category) ? p.category : 'OTHER';
-        groups[cat].push(p);
+        productGroups[cat].push(p);
       });
 
-      container.innerHTML = CATEGORIES
-        .filter(cat => groups[cat].length > 0)
-        .concat(groups['OTHER'].length > 0 ? ['OTHER'] : [])
-        .map(cat => buildCategoryHTML(cat, groups[cat]))
-        .join('');
+      // Build tabs
+      const activeCats = CATEGORIES.filter(cat => productGroups[cat].length > 0)
+        .concat(productGroups['OTHER'].length > 0 ? ['OTHER'] : []);
+      
+      const tabsHTML = `
+        <div class="category-tabs">
+          <div class="cat-tab active" onclick="filterByCategory('ALL')">All</div>
+          ${activeCats.map(cat => 
+            `<div class="cat-tab" onclick="filterByCategory('${cat}')">${cat}</div>`
+          ).join('')}
+          <div class="cat-tab-actions">
+            <div class="cat-tab action" onclick="selectAllVisible()">Select All</div>
+            <div class="cat-tab action" onclick="deselectAllVisible()">Deselect All</div>
+          </div>
+        </div>
+        <div class="product-grid" id="productGrid"></div>
+      `;
 
-      // Set dynamic max-height for collapse animation
-      container.querySelectorAll('.cat-items').forEach(el => {
-        el.style.maxHeight = el.scrollHeight + 'px';
+      container.innerHTML = tabsHTML;
+      filterByCategory('ALL'); // Show all products initially
+    }
+
+    function filterByCategory(cat) {
+      activeCategory = cat;
+      
+      // Update active tab
+      document.querySelectorAll('.cat-tab').forEach(tab => {
+        tab.classList.remove('active');
+        if (tab.textContent === cat || (cat === 'ALL' && tab.textContent === 'All')) {
+          tab.classList.add('active');
+        }
+      });
+
+      // Get products to show
+      let productsToShow = [];
+      if (cat === 'ALL') {
+        productsToShow = allProducts;
+      } else {
+        productsToShow = productGroups[cat] || [];
+      }
+
+      // Render product grid
+      const grid = document.getElementById('productGrid');
+      grid.innerHTML = productsToShow.map(p => buildProductHTML(p)).join('');
+      
+      // Restore checked states after rendering
+      document.querySelectorAll('#productGrid .check-item').forEach(el => {
+        const nameEl = el.querySelector('.check-name');
+        if (nameEl) {
+          const name = nameEl.textContent.trim();
+          if (checked.has(name)) {
+            el.classList.add('checked');
+          }
+        }
       });
     }
 
-    function buildCategoryHTML(cat, items) {
-      const itemsHTML = items.map(p => `
+    function buildProductHTML(p) {
+      return `
         <div class="check-item" id="ci-${slugify(p.name)}" onclick="toggleItem(this, '${esc(p.name)}')">
           <span class="check-box">
             <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
@@ -699,24 +819,12 @@
             </svg>
           </span>
           <span class="check-name">${p.name}</span>
-        </div>`).join('');
-
-      return `
-        <div class="category-group" data-cat="${cat}">
-          <div class="cat-header" onclick="toggleCategory('${cat}')">
-            <span class="cat-label">${cat}</span>
-            <span class="cat-line"></span>
-            <span class="cat-count" id="cnt-${cat}">${items.length}</span>
-            <span class="cat-toggle" id="tog-${cat}">▾</span>
-          </div>
-          <div class="cat-actions">
-            <button class="cat-action-btn" onclick="selectAllCat(event,'${cat}')">Select all</button>
-            <span style="color:var(--border);">·</span>
-            <button class="cat-action-btn" onclick="deselectAllCat(event,'${cat}')">Deselect all</button>
-          </div>
-          <div class="cat-items" id="catItems-${cat}">
-            ${itemsHTML}
-          </div>
+          <span class="check-price">
+            <svg class="dirham-symbol" width="16" height="16" viewBox="0 0 448 392" fill="currentColor">
+              <path d="https://drive.google.com/file/d/1lZBtuX3ki_-Jg-iH-78sTJePxHuA2VoI/view?usp=drive_link"/>
+            </svg>
+            ${p.price || ''}
+          </span>
         </div>`;
     }
 
@@ -777,29 +885,33 @@
     // ── Search / filter ───────────────────────────────────
     function filterProducts() {
       const q = document.getElementById('productSearch').value.trim().toLowerCase();
-      let anyVisible = false;
+      
+      if (!q) {
+        // No search query - show current category
+        filterByCategory(activeCategory);
+        return;
+      }
 
-      document.querySelectorAll('.category-group').forEach(group => {
-        let groupVisible = false;
-        group.querySelectorAll('.check-item').forEach(label => {
-          const name = label.querySelector('.check-name').textContent.toLowerCase();
-          const show = !q || name.includes(q);
-          label.classList.toggle('hidden', !show);
-          if (show) { groupVisible = true; anyVisible = true; }
+      // Search across all products
+      const matchingProducts = allProducts.filter(p => 
+        p.name.toLowerCase().includes(q)
+      );
+
+      // Render matching products
+      const grid = document.getElementById('productGrid');
+      if (matchingProducts.length === 0) {
+        grid.innerHTML = '<div style="grid-column: 1/-1; text-align:center; padding:40px; color:var(--sage);">No products found</div>';
+      } else {
+        grid.innerHTML = matchingProducts.map(p => buildProductHTML(p)).join('');
+        
+        // Restore checked states
+        document.querySelectorAll('#productGrid .check-item').forEach(el => {
+          const nameEl = el.querySelector('.check-name');
+          if (nameEl && checked.has(nameEl.textContent.trim())) {
+            el.classList.add('checked');
+          }
         });
-        group.style.display = groupVisible ? '' : 'none';
-
-        // Re-expand on search
-        if (q && groupVisible) {
-          const items = group.querySelector('.cat-items');
-          const tog   = group.querySelector('.cat-toggle');
-          items.classList.remove('collapsed');
-          tog.classList.remove('collapsed');
-          items.style.maxHeight = '9999px';
-        }
-      });
-
-      document.getElementById('noResults').style.display = anyVisible ? 'none' : 'block';
+      }
     }
 
     // ── Badge ─────────────────────────────────────────────
@@ -839,17 +951,28 @@
         .withSuccessHandler(res => {
           btn.disabled = false;
           btn.innerHTML = 'Submit Request';
-          if (res.success) {
+          if (res && res.success) {
             document.getElementById('formWrap').style.display = 'none';
             document.getElementById('successScreen').style.display = 'block';
+            // Scroll to top so success screen is visible
+            window.scrollTo({ top: 0, behavior: 'smooth' });
           } else {
-            showError('Submission failed: ' + (res.error || 'Unknown error.'));
+            const errMsg = res && res.error ? res.error : 'Unknown error. Please check the Sheet ID in Code.gs is correct.';
+            showError('Submission failed: ' + errMsg);
           }
         })
         .withFailureHandler(err => {
           btn.disabled = false;
           btn.innerHTML = 'Submit Request';
-          showError('An error occurred: ' + err.message);
+          const msg = err.message || err.toString();
+          // Common causes explained clearly
+          if (msg.includes('openById') || msg.includes('404') || msg.includes('not found')) {
+            showError('Could not open the Google Sheet. Please check that PRODUCT_SHEET_ID in Code.gs is correct and the sheet is shared with the script.');
+          } else if (msg.includes('permission') || msg.includes('authoriz')) {
+            showError('Permission error. Please re-authorise the script by running any function manually in the Apps Script editor.');
+          } else {
+            showError('An error occurred: ' + msg);
+          }
         })
         .submitRequest({ email, dateRequested: date, branch, priceTagList, notes });
     }
